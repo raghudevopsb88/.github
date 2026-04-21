@@ -14,3 +14,10 @@ The following are the links that we will refer to in the training
 growpart /dev/nvme0n1 4 
 lvextend -r -L +5GB /dev/mapper/RootVG-homeVol
 ```
+
+## Load Test Commands.
+```
+docker rm -f wmp-load
+docker pull docker.io/rkalluru/wmp-load:latest
+docker run -d -p 5000:5000 --name wmp-load docker.io/rkalluru/wmp-load:latest
+```
