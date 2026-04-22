@@ -21,3 +21,32 @@ docker rm -f wmp-load
 docker pull docker.io/rkalluru/wmp-load:latest
 docker run -d -p 5000:5000 --name wmp-load docker.io/rkalluru/wmp-load:latest
 ```
+
+## Logstash Config.
+```
+input {
+  beats {
+    port => 5044
+  }
+}
+
+filter {
+  if [kubernetes][container][name] == "frontend" {
+  grok {
+    match => { "message" => "%{IP:ip}%{SPACE}%{HTTPDATE:date}%{SPACE}%{WORD:http_method}%{SPACE}%{PATH:http_path}%{SPACE}%{WORD}/%{NUMBER}%{SPACE}%{NUMBER:http_code}%{SPACE}%{NUMBER:response_time}%{SPACE}%{NUMBER:response_size}%{SPACE}%{QUOTEDSTRING:http_referer}%{SPACE}%{QUOTEDSTRING:http_user_agent}%{SPACE}%{QUOTEDSTRING:http_x_forwarded_for}" }
+  }
+ } else {
+  drop { }
+ }
+}
+
+output {
+  elasticsearch {
+    hosts => ["https://localhost:9200"]
+    ssl_verification_mode => "none"
+    user => "elastic"
+    password => "eD9mWinX-tBjgyIacNJe"
+    index => "%{[kubernetes][container][name]}"
+  }
+}
+```
